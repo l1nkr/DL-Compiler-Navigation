@@ -164,7 +164,8 @@ tvm、mlir论文
 
 ### AI框架中的IR分析
 
-参考这个[https://zhuanlan.zhihu.com/p/263420069。从一个比较顶层的视角来看IR，包括编译器的IR以及深度学习编译的IR。有挺多东西看不懂的，里面说的不同表示能够取得不同的效果，我也不知道是什么原因。然后里面还提到了函数式编程的概念。](https://zhuanlan.zhihu.com/p/263420069%E3%80%82%E4%BB%8E%E4%B8%80%E4%B8%AA%E6%AF%94%E8%BE%83%E9%A1%B6%E5%B1%82%E7%9A%84%E8%A7%86%E8%A7%92%E6%9D%A5%E7%9C%8BIR%EF%BC%8C%E5%8C%85%E6%8B%AC%E7%BC%96%E8%AF%91%E5%99%A8%E7%9A%84IR%E4%BB%A5%E5%8F%8A%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E8%AF%91%E7%9A%84IR%E3%80%82%E6%9C%89%E6%8C%BA%E5%A4%9A%E4%B8%9C%E8%A5%BF%E7%9C%8B%E4%B8%8D%E6%87%82%E7%9A%84%EF%BC%8C%E9%87%8C%E9%9D%A2%E8%AF%B4%E7%9A%84%E4%B8%8D%E5%90%8C%E8%A1%A8%E7%A4%BA%E8%83%BD%E5%A4%9F%E5%8F%96%E5%BE%97%E4%B8%8D%E5%90%8C%E7%9A%84%E6%95%88%E6%9E%9C%EF%BC%8C%E6%88%91%E4%B9%9F%E4%B8%8D%E7%9F%A5%E9%81%93%E6%98%AF%E4%BB%80%E4%B9%88%E5%8E%9F%E5%9B%A0%E3%80%82%E7%84%B6%E5%90%8E%E9%87%8C%E9%9D%A2%E8%BF%98%E6%8F%90%E5%88%B0%E4%BA%86%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%A6%82%E5%BF%B5%E3%80%82)
+参考这个https://zhuanlan.zhihu.com/p/263420069。从一个比较顶层的视角来看IR，包括编译器的IR以及深度学习编译的IR。有挺多东西看不懂的，里面说的不同表示能够取得不同的效果，我也不知道是什么原因。然后里面还提到了函数式编程的概念。
+
 
 **性能上的优化(XLA/TVM/TC)**
 
@@ -178,11 +179,19 @@ tvm、mlir论文
 
 ### 相关资料
 [Deep Learning Systems Course (CMU; video)](https://www.youtube.com/channel/UC3-KIvmiIaZimgXMNt7F99g)
+
 [机器学习系统：设计和实现 (book)](https://openmlsys.github.io/)
+
 [动手学深度学习 (book; video)](https://zh-v2.d2l.ai/)
+
 [实用机器学习 (video)](https://space.bilibili.com/1567748478/channel/collectiondetail?sid=28144)
+
 [TVM官网 (blog)](https://chinese.tvm.wiki/)
+
 [BBuf (blog)](http://giantpandacv.com/project/%E9%83%A8%E7%BD%B2%E4%BC%98%E5%8C%96/)
+
 [Haskell (book)](http://learnyouahaskell.com/syntax-in-functions)
+
 [论文汇总 (github)](https://github.com/merrymercy/awesome-tensor-compilers#open-source-projects)
+
 [LLVM (book)](https://getting-started-with-llvm-core-libraries-zh-cn.readthedocs.io/zh_CN/latest/)
