@@ -75,6 +75,15 @@ FlexTensor 由前端和后端两部分组成。
 文章的Background里对发展现状总结的挺清晰的。
 
 对各种特征进行建模的思路也值得借鉴。
+
+### a-deep-learning-based-cost-model-for-automatic-code-optimization (MLSys 2021)
+
+有非常大的局限，首先他只能用于为cpu生成模型，其次对于不同的cpu他需要重新生成数据训练模型（自己构造的数据）
+
+优点是不依赖于提取复杂的特征
+
+基于TIRAMISU实现
+
 ### One-shot Tuner(CC 2022)
 
 采用受神经预测器启发的方法来减少自动调整开销，并表明在编译之前训练的性能预测器模型可以生成优化的张量操作代码，而**无需重复搜索和硬件测量**。
