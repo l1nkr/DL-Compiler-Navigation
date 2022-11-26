@@ -84,6 +84,12 @@ FlexTensor 由前端和后端两部分组成。
 
 基于TIRAMISU实现
 
+### Value Learning for Throughput Optimization of Deep Neural Workloads(MLSys 2021)
+
+将调度过程建模为一系列优化选择，并提出了一种新技术来准确预测部分调度的预期性能。
+
+使用 LSTM 建模算子和当前调度选择的特征。利用这些预测，能够做出优化决策，并且无需在目标硬件上执行任何操作，即可快速确定有效的调度。
+
 ### One-shot Tuner(CC 2022)
 
 采用受神经预测器启发的方法来减少自动调整开销，并表明在编译之前训练的性能预测器模型可以生成优化的张量操作代码，而**无需重复搜索和硬件测量**。
