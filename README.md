@@ -4,7 +4,19 @@
 
 ### Learning to Optimize Tensor Program (AtuoTVM. NeurIPS 2018)
 
-使用机器学习方法优化算子模板
+解空间：`S`
+具体调度：`s`
+算子表达式：`e`
+生成的表达式：`x=g(e,s)`
+硬件上的性能：`f(g(e,s))`
+成本模型上的性能：`f^(g(e,s))`
+最终的目标就是`min(f(g(e,s)))`
+
+* explore得到的`s`将会生成`f^(g(e,s))`，`f^()`是`模拟退火`的`energy function`，所以一些s会被筛选掉，将一些比较有希望的放到硬件上生成`f(g(e,s))`。那么此时我们就有了一个打上了标签的数据，再利用此数据训练更新cost model。cost model训练的越好，通过模拟退火得到的配置就越好。当得到一定数量的数据后（数量取决于模拟退火迭代次数），从中选取性能最好的配置作为最终结果。
+* 使用了并行的马尔科夫模型来提升cost model的吞吐量
+* 迁移学习
+  * The key to transfer learning is to create a **transferable representation** that is **invariant** to the source and target domains
+  * To leverage this invariance, our cost model f^(x) takes the **low-level loop AST x** as input.
 
 ### FlexTensor: An Automatic Schedule Exploration and Optimization Framework for Tensor Computation on Heterogeneous System (ASPLOS 2020)
 
