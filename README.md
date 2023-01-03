@@ -1,5 +1,31 @@
 # DL-Complier-Navigation
 
+## 还未读
+
+### FamilySeer: Towards Optimized Tensor Codes by Exploiting Computation Subgraph Similarity (arxiv)
+
+是一个基于TVM的auto-tuning框架。文中指出现有方法的问题是training sample与time budget无法很好地利用。FamilySeer将subgraph聚类成family，同类中的subgraph可以共享training sample与time budget。Ansor中的cost model对所有的subgraph是一个，忽略了subgraph的不同特性。它对Ansor进行了改进，基本思想是挖掘subgraph间的相似性，将subgraph合并成family，对每个subgraph family构建cost model。这样一个subgraph的tuning也能用于同一faimily的另外subgraph。另外，还实现了cost model的并行训练，以及GPU上的cost measurement。与Ansor相比，FamilySeer在搜索效率上可以有平均约2-3x的性能提升，同时达到相同性能。
+
+### Simulating Execution Time of Tensor Programs using Graph Neural Networks (arxiv)
+
+基于TVM，提出学习surrogate model来克服搜索configuration space耗时的问题。模型基于AST进行训练，使用graph convolutional network（GraphNN）来挖掘graph中的结构信息。它的优势是使用可学习的基于图的处理比基于heuristic的特征提取有优势。AST中的每个节点会通过一个shared encoder编码成一个固定长的特征，节点间的信息通过GraphNN来传递。这些信息会整合进一个固定长的向量，最后通过一个预测函数对性能进行预测。
+
+### Tuna: A Static Analysis Approach to Optimizing Deep Neural Networks (arxiv)
+
+使用张量计算性能的静态分析（编译时）方法，基于analytical cost model预测tensor program性能。它基于TVM实现（重用了TE, IR与codegen）。静态分析的优点是可以在多核CPU机器上运行。它基于目标硬件特点构建特征。Tuna既分析program IR也分析low-level生成代码（assembly codes），来提取目标硬件相关的特征（如SIMD指令数量、CPU cache局部性、GPU shared memory使用等）。如GPU cost model会考虑PTX指令数量，thread level parallelism, workload per thread, SM occupancy, warp latency hiding, shared memory bank conflict。Program的performance score这些特征的线性模型（其参数是per-hardware的，通过profiling确定）。根据这些特征就可以预测tensor program上一组transformation的相对性能。搜索方法使用了evolution strategy（ES）。实验中的metrics包括compilation time/cost与inference latency。与AutoTVM相比，它可以只用1.65%的编译时间达到相当的性能。
+
+### Bayesian Optimization for auto-tuning GPU kernels (pmbs)
+
+采用Bayesian optimization（BO）用于GPU平台上的kernel auto-tuning。文中引入了一种contextual variance exploration factor与一种新的acquisition function，结合acquisition function选择机制来克服搜索空间离散且复杂，以及包含invalid configurations等挑战。BO包含几个基本组件：objective function，surrogate model与acquisition function。由于objective function未知且评估通常很费时，Surrogate model用于模拟objective function，一般求值没有objective function那么费时。本文方法使用Gaussian processes（GP）作为surrogate model。GP中的covariance function中的kernel使用Matérn kernel。Acquisition function在surrogate model上优化，给出下一次要在objective function上评估的parameter configuration。它需要考虑exploration与exploitation间的trade-off，原则上它会选取未知的区域或是有性能提升潜力的配置。Acquisition function通常有Probability of Improvement, Expected Improvement和Upper Confidence Bound。Acquisition function中的exploration factor一般置为常数，文中采用contextual variance在每一次评估中根据surrogate model的状态设置该参数。文中提出multi与advanced multi两种acquisition function，一开始，会有多个acquisition functions，在搜索过程中当给出重复建议时会将其忽略。这样就可以根据特定问题选取最优的acquisition function。实验中与Kernel Tuner框架中其它的方法（Simulated Annealing, Multi-start Local Search, Genetic Algorithm），以及其它的BO框架（BayesianOptimization，Scikit-optimize）作了比较。在OpenCL GEMM，CUDA 2D Convolution，及异构point-in-polygon三个GPU kernel上，本中方法有更优的表现。
+
+### DietCode: Automatic Optimization for Dynamic Tensor Programs (mlsys 22)
+
+基于TVM中的Ansor，TVM中现有的自动调优机制Ansor要求workload是static的。对于dynamic-shape workload则会导致tuning时间很长（对每个shape都tuning一把）。一些用于dynamic shape支持的扩展面临不够自动或者产生的kernel性能较差的问题。如Selective tuning需要专家经验。Nimble针对large shape进行tuning，然后将得到的schedule应用到所有的shape上。但在large shape上最优的schedule未必对其它也是最优的（因为padding等原因）。Bucketing会引入padding开销与冗余计算。DietCode基于完整程序是由micro-kernels组成的这个观察，为dynamic shape构建由micro-kernels组成的shape-generic搜索空间，然后对于所有shape在这个统一的空间中进行联合搜索。相应地，文中构建了micro-kernel-based cost model。它分为两个部分：一部分是shape-generic的cost function，预测micro-kernel的cost；另一部分对应shape-dependent的adaption cost function（这部分可通过occupancy与padding ratio计算，不需要feature extraction）。当调优结束，会输出一组micro-kernels。为了将所有可能的shape dispatch到这些micro-kernels，Automatic dispatching机制基于cost model针对特定shape对每个micro-kernel进行投票，然后训练decision tree自动地将选取同一micro-kernel的shape归为一类，并生成源码用于运行时shape到micro-kernel的分派。对于dynamic shape的workload它比现有的auto-scheduling机制tuning时间减少数倍，同时性能上也比现有auto-scheduling与vendor library有所提升。
+
+### AKG: Automatic Kernel Generation for Neural Processing Units Using Polyhedral Transformations
+
+AKG使用auto-tuner来找tiling策略。它使用machine learning guided sampling approach来减少tuning空间。AKG先根据一定的策略计算包含合法tiling参数的tuning空间，然后第一轮采样一些样本，并测其性能。这些样本用来训练机器学习模型，并产生第二批样本。第二轮的样本是从第一轮中最好的N个加上改动而来。这个改动以一定概率根据机器学习模型往高性能的方向前进，或者随机选取。第二批样本也会测量其性能并用来更新模型
+
 ## Tuning and Schedule
 
 ### Learning to Optimize Tensor Program (AtuoTVM. NeurIPS 2018)
@@ -45,7 +71,7 @@ FlexTensor 由前端和后端两部分组成。
 
 - **Evolutionary：训练 Cost Model，根据 Cost Model 对代码的性能进行评估，选取评估中取得高分数的一组实现，再通过运行时模块，获取 ground truth 和实际性能，选取实际性能最优的实现作为 ANSOR 的输出。**
 
-### Woodpecker-DL
+### Woodpecker-DL (gtc)
 
 研究了基于**遗传算法和强化学习**的两种新的自动搜索方法，以寻找针对特定硬件的最佳运算符代码配置
 
@@ -77,6 +103,8 @@ FlexTensor 由前端和后端两部分组成。
 - 静态调度对张量程序的了解有限，难以利用实际的优化行为。从执行的角度来看，张量算子的优化是相互独立的，因此我们可以按任意顺序甚至不连续地优化它们。
 - 即使有动态信息，也不清楚如何最好地推断估计的性能。鉴于优化结果，有动机采用“预测-然后优化”范式
 
+主要针对time allocation问题。即如何充分利用编译的时间，时间花可能大提升性能的地方，从而提升整个模型的tuning收敛速度。分析了DL编译器几点挑战：1. 现有方法关注单算子收敛速度（非整模型）。2. 静态调度不够。3. 即使用动态信息，难以extrapolate estimated performance。针对这些问题，DynaTune使用MAB（Multi-Armed Bandit）模型，目标是设计scheduler使cumulative regret最小。UCB（upper confidence bound）用来处理time-slot-based optimization中的决策问题。模型中需要知道maximum latency reduction的算子，而它实际中无法得到。因此文中设计了Bayesian belief model（+MCMC）来预测每个算子的潜在的performance gain，其中的uncertainty信息可以用于指导搜索。实验中它与static schedule（Random, Round-robin与Linear）和dynamic scheme（Dynamic allocation + Random selection, Dynamic allocation + Round-robin selection）做了比较。
+
 ### Lorien: Efficient Deep Learning Workloads Delivery (SoCC 2021)
 
 提出lorien，充当自动调整**深度学习框架和计算资源之间的抽象层**。
@@ -106,6 +134,8 @@ FlexTensor 由前端和后端两部分组成。
 将调度过程建模为一系列优化选择，并提出了一种新技术来准确预测部分调度的预期性能。
 
 使用 LSTM 建模算子和当前调度选择的特征。利用这些预测，能够做出优化决策，并且无需在目标硬件上执行任何操作，即可快速确定有效的调度。
+
+这篇文章提出一种预测partial schedule期望性能的方法。具体地，它将选取最优schedule的问题建模为Markov Decision Process（MDP），状态s_i为模型前i层的schedule，即partial schedule。动作a_i为给定s_i下第i + 1层的合法scheduling选项。为了求解MDP，就需要一个值函数的估计。这个值函数的作用是预测给定状态下如果后续都采用最优schedule能达到的最小执行时间。实现中它基于LSTM，输入为两类特征：与schedule无关的intrinsic特征，以及schedule相关acquired特征。然后通过强化学习中的value iteration方法对值函数进行近似。其中对于每个状态，基于之前的值函数版本执行beam search，然后通过benchmarking得到性能，再对值函数进行修正。有了这个值函数后，就可以使用贪心方法进行优化了 ，且不需要在目标平台上执行，从而快速找到高效的schedule。实验中它找到的schedule执行性能优于Halide和TVM，同时搜索时间有2到3个数量级的加速（从小时级到秒级）。
 
 ### One-shot tuner for deep learning compilers (CC 2022)
 
