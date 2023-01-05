@@ -228,6 +228,24 @@ IREE 仍处于早期阶段。 我们已经确定了总体基础设施，并正�
 
 ### XLA
 
+两个主流编译框架XLA（针对访存密集算子）和TVM（针对计算密集算子）
+
+XLA采取了了一种相对比较朴素的技术路径。对于对自动CodeGen要求较高的计算密集型算子，如MatMul/Convolution等，会直接调用cuBLAS/cuDNN等Vendor Library；而对于除此之外的访存密集型算子，XLA会进行完全自动的Op Fusion和底层代码生成（CodeGen）。
+
+除编译本身外，XLA还包含了一套静态的执行引擎。这个静态性体现在静态的Fixed Shape编译（ 即，在运行时为每一套输入shape进行一次完整编译并保留编译结果 ），静态的算子调度顺序，静态的显存/内存优化等方面，以期望获得更好的性能/存储优化结果。
+
+XLA的主要性能收益来源可以概括为如下几个方面：
+
+- 访存密集型算子的Op Fusion收益，这是目前在大多数业务中XLA最主要的收益来源；
+- Fixed Shape架构下，TensorFlow计算图中的shape计算相关的子图会在编译时被分析为静态的编译时常量，节省执行时的节点数量。
+- HLO层在比TensorFlow Graph的颗粒度上可能存在更大的图优化空间。
+
+此外，XLA的架构也可以方便开发者扩展更多的图优化Pass，包括Layout优化和并发调度优化等等。
+
+XLA的目的是帮助用户做通用，透明的一键式性能优化，提升Training／Inference时的Latency／Throughput等，整个过程完全自动。嵌入到宿主TensorFlow里执行的XLA会在原始计算图上自动圈出能够完整支持的子图，不能支持的个别算子可以继续通过TensorFlow的执行引擎来执行，因此对不同的计算图都有比较好的兼容性和可回退特性。从应用场景上，XLA不区分training或者inference，与TensorFlow的良好集成使得它可以实现对用户的完全透明。
+
+[参考](https://zhuanlan.zhihu.com/p/163717035)
+
 XLA的全称是Accelerated Linear Algebra，即加速线性代数。作为一种**深度学习编译器**，长期以来被作为Tensorflow框架的一个试验特性被开发，历时至今已经超过两三年了，随着Tensorflow 2.X的发布，XLA也终于从试验特性变成了默认打开的特性。此外， Pytorch社区也在大力推动XLA在Pytorch下的开发，现在已经有推出PyTorch/XLA TPU版本，暂只支持谷歌平台TPU上使用。
 
 XLA使用JIT编译技术来分析用户在运行时创建的 TensorFlow 图，将TensorFlow Op转换成为HLO（High LevelOptimizer）中间表示并在HLO层上完成包括Op Fusion在内的多种图优化，最后基于LLVM完成CPU／GPU等机器代码的自动生成。
@@ -236,7 +254,6 @@ XLA的目的是帮助用户做通用，透明的一键式性能优化，提升Tr
 
 参考：[华为开发者论坛](https://developer.huawei.com/consumer/cn/forum/topic/0201750315901780148?fid=0101592429757310384)
 
-https://zhuanlan.zhihu.com/p/163717035
 
 ### HLO
 
@@ -392,6 +409,18 @@ OpenVINO™ 是一个用于优化和部署人工智能（AI）推理的开源工
 
 ### 分布式推理
 
+### Dynamic Shape
+
+Static 编译会在运行时捕捉待编译子图的实际输入shape组合，并且为每一个输入shape组合生成一份编译结果。
+
+Static Shape Compiler的优势显而易见，编译期完全已知静态shape信息的情况下，Compiler可以作出更好的优化决策并得到更好的CodeGen性能，同时也能够得到更好的显存/内存优化plan和调度执行plan；然而，Static Shape Compiler的缺点也十分明显，具体包括：
+
+编译开销的增加。对于训练业务，编译开销导致训练迭代速度不稳定，训练初期显著负优化，甚至整个训练过程的时间开销负优化；对于Inference业务，很多业务实际部署和迭代时不允许出现性能抖动，而离线的预编译预热又会使得部署的过程变复杂。
+内存显存占用的增加。除编译开销的问题之外，当shape变化范围特别大的时候，编译缓存额外占用的内存显存，经常导致实际部署环境下的内存/显存OOM，直接阻碍业务的实际落地。
+对于一部分业务场景，shape变化范围可能非常大甚至是趋于无穷的，比较常见的包括广告推荐类业务中常见的稀疏化模型，还有例如分布式训练下的embedding切片等等。在这种情况下，编译缓存永远也无法收敛，用户也就不可能通过compiler获取到性能收益了。
+上述问题在部分情况下，可以通过人工干预Compiler的圈图过程来缓解，即，将shape变化剧烈的子图排除在编译范围之外。然而，这种解决办法对用户非常不友好，大大降低了Compiler应用的通用性和透明性，这要求做部署和优化的同学同时对模型结构和compiler非常了解，且每一次模型结构迭代时，都需要花费额外的工作量来调整圈图获得可以接受的性能效果。
+
+[参考](https://zhuanlan.zhihu.com/p/305546437)
 ## 编译器场景下的资源调度问题
 
 ### VELTAIR: Towards High-Performance Multi-tenant Deep Learning Services via Adaptive Compilation and Scheduling (ASPLOS 22)
