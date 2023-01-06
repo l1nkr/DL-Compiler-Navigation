@@ -2,10 +2,6 @@
 
 ## 还未读
 
-### FamilySeer: Towards Optimized Tensor Codes by Exploiting Computation Subgraph Similarity (arxiv)
-
-是一个基于TVM的auto-tuning框架。文中指出现有方法的问题是training sample与time budget无法很好地利用。FamilySeer将subgraph聚类成family，同类中的subgraph可以共享training sample与time budget。Ansor中的cost model对所有的subgraph是一个，忽略了subgraph的不同特性。它对Ansor进行了改进，基本思想是挖掘subgraph间的相似性，将subgraph合并成family，对每个subgraph family构建cost model。这样一个subgraph的tuning也能用于同一faimily的另外subgraph。另外，还实现了cost model的并行训练，以及GPU上的cost measurement。与Ansor相比，FamilySeer在搜索效率上可以有平均约2-3x的性能提升，同时达到相同性能。
-
 ### Simulating Execution Time of Tensor Programs using Graph Neural Networks (arxiv)
 
 基于TVM，提出学习surrogate model来克服搜索configuration space耗时的问题。模型基于AST进行训练，使用graph convolutional network（GraphNN）来挖掘graph中的结构信息。它的优势是使用可学习的基于图的处理比基于heuristic的特征提取有优势。AST中的每个节点会通过一个shared encoder编码成一个固定长的特征，节点间的信息通过GraphNN来传递。这些信息会整合进一个固定长的向量，最后通过一个预测函数对性能进行预测。
@@ -70,6 +66,11 @@ FlexTensor 由前端和后端两部分组成。
 - **Annotation：随机初始化 Tilling Size 和一些 for 循环的策略，获得计算图的完整表示**
 
 - **Evolutionary：训练 Cost Model，根据 Cost Model 对代码的性能进行评估，选取评估中取得高分数的一组实现，再通过运行时模块，获取 ground truth 和实际性能，选取实际性能最优的实现作为 ANSOR 的输出。**
+
+### FamilySeer: Towards Optimized Tensor Codes by Exploiting Computation Subgraph Similarity (arxiv)
+
+是一个基于TVM的auto-tuning框架。文中指出现有方法的问题是training sample与time budget无法很好地利用。FamilySeer将subgraph聚类成family，同类中的subgraph可以共享training sample与time budget。Ansor中的cost model对所有的subgraph是一个，忽略了subgraph的不同特性。
+它对Ansor进行了改进，基本思想是挖掘subgraph间的相似性，将subgraph合并成family，对每个subgraph family构建cost model。在训练每个subgraph family 的时候，充分考虑了 time budget 的问题，优先选择优化潜力最大的 graph 所在的 family 进行调优。这样一个subgraph的tuning也能用于同一faimily的另外subgraph。另外，还实现了cost model的并行训练，以及GPU上的cost measurement。与Ansor相比，FamilySeer在搜索效率上可以有平均约2-3x的性能提升，同时达到相同性能。
 
 ### Woodpecker-DL (gtc)
 
