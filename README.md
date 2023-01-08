@@ -106,14 +106,6 @@ FlexTensor 由前端和后端两部分组成。
 
 主要针对time allocation问题。即如何充分利用编译的时间，时间花可能大提升性能的地方，从而提升整个模型的tuning收敛速度。分析了DL编译器几点挑战：1. 现有方法关注单算子收敛速度（非整模型）。2. 静态调度不够。3. 即使用动态信息，难以extrapolate estimated performance。针对这些问题，DynaTune使用MAB（Multi-Armed Bandit）模型，目标是设计scheduler使cumulative regret最小。UCB（upper confidence bound）用来处理time-slot-based optimization中的决策问题。模型中需要知道maximum latency reduction的算子，而它实际中无法得到。因此文中设计了Bayesian belief model（+MCMC）来预测每个算子的潜在的performance gain，其中的uncertainty信息可以用于指导搜索。实验中它与static schedule（Random, Round-robin与Linear）和dynamic scheme（Dynamic allocation + Random selection, Dynamic allocation + Round-robin selection）做了比较。
 
-### Lorien: Efficient Deep Learning Workloads Delivery (SoCC 2021)
-
-提出lorien，充当自动调整**深度学习框架和计算资源之间的抽象层**。
-
-1. 提供了一个**分布式系统**来调整来自 Amazon EC2 实例或边缘设备上的各种自动调整框架的大量调整任务
-2. 设计了一个通用数据模型，可以**适应来自各种自动调优框架的调优结果**
-3. Lorien 中的**性能成本模型是通过自动机器学习**(AutoML) 对高级调度功能进行训练的，**支持零样本调整**（泛化性良好）
-
 ### TenSet: A Large-scale Program Performance Dataset for Learned Tensor Compilers (NeurIPS 2021)
 
 提出了TenSet，一个大规模张量程序性能数据集，包含从 Intel CPU、AMD CPU、ARM CPU 和 NVIDIA GPU 的真实测量中收集的 5200 万条程序性能记录。
@@ -422,6 +414,29 @@ Static Shape Compiler的优势显而易见，编译期完全已知静态shape信
 上述问题在部分情况下，可以通过人工干预Compiler的圈图过程来缓解，即，将shape变化剧烈的子图排除在编译范围之外。然而，这种解决办法对用户非常不友好，大大降低了Compiler应用的通用性和透明性，这要求做部署和优化的同学同时对模型结构和compiler非常了解，且每一次模型结构迭代时，都需要花费额外的工作量来调整圈图获得可以接受的性能效果。
 
 [参考](https://zhuanlan.zhihu.com/p/305546437)
+
+## 分布式场景
+
+### Lorien: Efficient Deep Learning Workloads Delivery (SoCC 21)
+
+提出lorien，充当自动调整**深度学习框架和计算资源之间的抽象层**。
+
+1. 提供了一个**分布式系统**来调整来自 Amazon EC2 实例或边缘设备上的各种自动调整框架的大量调整任务
+2. 设计了一个通用数据模型，可以**适应来自各种自动调优框架的调优结果**
+3. Lorien 中的**性能成本模型是通过自动机器学习**(AutoML) 对高级调度功能进行训练的，**支持零样本调整**（泛化性良好）
+
+### Varuna: Scalable, Low-cost Training of Massive Deep Learning Models (EuroSys 22)
+
+由于机器学习硬件资源需要，通常会在大规模集群上进行训练。集群间的连接如NV-Link和Infiniband会成为性能瓶颈，导致
+- scalability limits on job parallelism; 
+- resource fragmentation across hyperclusters.
+  
+提出了Varuna
+- 允许在商用网络上训练大规模深度学习模型。
+- Varuna能降低网络资源使用并能够自动配置用户的训练任务来充分利用硬件资源。
+- Varuna 能够利用成本比专用 GPU 便宜约 5 倍的“低优先级”虚拟机，从而显着降低训练大规模模型的成本。
+
+
 ## 编译器场景下的资源调度问题
 
 ### VELTAIR: Towards High-Performance Multi-tenant Deep Learning Services via Adaptive Compilation and Scheduling (ASPLOS 22)
