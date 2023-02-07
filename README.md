@@ -141,9 +141,26 @@ TLP 为张量程序调优设计了一种简单而有效的通用**特征提取**
 
 MTL-TLP利用**multi-tasking**技术解决**离线成本模型跨硬件不可用**问题。
 
-### AutoTensorIR
+### Metaschedule. Tensor Program Optimization with Probabilistic Programs (NeurIPS 22)
 
-继autotvm, ansor之后第三代方法，但是现在还不可用
+优化效果依赖于搜索空间大小和搜索算法的效率。但是大多数现有的方法无法灵活的让领域专家扩大搜索空间。
+MetaSchedule，一种特定于领域的**概率编程语言抽象**，用于构建构建搜索空间。
+- 允许领域专家分析程序，并以模块（将多个transformation组合起来）为单位进行随机选择，组合起来对程序进行转换。
+- 构建了一个端到端的learning-driven框架对给定的搜索空间进行搜索。 
+
+当前问题
+
+- **手动调度**：开发人员通过手动调用调度原语来优化他们的程序，即在循环中探索设计空间中的点，是一种繁琐且容易出错的方法
+- **AutoTVM**：要求用户定义“调度模板”作为调度空间。
+- **AutoScheduler (Ansor)**：它根据一组预定义的“搜索规则”自动生成计划模板作为设计空间。 然而，将 AutoScheduler 扩展到新的调度原语（张量化、循环分区、软件流水线）并非易事。
+上面的三个系统都有独立的 API 集，这些 API 有几层自己的抽象，不仅难以学习，而且定制起来也需要大量工程。
+
+meta schedule的好处
+
+- 简洁的语法、与 TensorIR 调度一致的 API，没有其他抽象层。
+- 提供统一的API，用于实现手动调度、AutoTVM和AutoScheduler（Ansor）。
+- 对所有调度原语的可扩展性，包括张量化和循环分区。 在自动调整中使用新原语几乎不需要额外的努力。
+- 自动化基础设施在每一层都是可定制的。
 
 ## Compiler and IR
 
