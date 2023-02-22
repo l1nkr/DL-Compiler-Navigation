@@ -1,0 +1,15 @@
+trace和script的区别有：
+
+1. trace只记录走过的tensor和对tensor的操作，不会记录任何控制流信息，如if条件句和循环。因为没有记录控制流的另外的路，也没办法对其进行优化。好处是trace深度嵌入python语言，复用了所有python的语法，在计算流中记录数据流。
+
+2. script会去理解所有的code，真正像一个编译器一样去进行lexer、parser、Semantic analusis的分析「也就是词法分析语法分析句法分析，形成AST树，最后再将AST树线性化」。script相当于一个嵌入在Python/Pytorch的DSL，其语法只是pytorch语法的子集，这意味着存在一些op和语法script不支持，这样在编译的时候就会遇到问题。此外，script的编译优化方式更像是CPU上的传统编译优化，重点对于图进行硬件无关优化，并对IF、loop这样的statement进行优化。
+
+
+trace这个功能从pytorch 0.3就开始支持了，不过最开始是用于export ONNX模型，发展到现在，底层已经有了一个well defined C++ runtime，所以现在Pytorch可以直接使用trace以及trace function进行runtime inference。Trace是个双刃剑，好处是用户无需了解python代码个中细节，无论是function、module还是generators、coroutines，trace都会忠实地记录下经过的tensor 以及tensor function，坏处就在于trace不能感知控制流和计算图的动态，比如他会把循环展开，一方面可能可以增加编译优化的空间，另一方面如果该循环在不同infer的时候是动态变长的，那么trace不能感知到这一点，只会将trace时候的循环记录下来。
+
+
+
+
+
+
+https://zhuanlan.zhihu.com/p/410507557

@@ -1,0 +1,16 @@
+.vscode/
+.idea/
+workspace/
+
+model/
+user_tutorial/Compiling_and_Optimizing_a_Model_with_TVMC/model/
+*/model/
+user_tutorial/Getting_Starting_using_TVMC_Python/convertedModel
+
+*__pycache__/
+*.pkl_memoize_py3/
+*.npz
+*.tar
+*.json
+
+note/total_latency.tsv
