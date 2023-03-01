@@ -3,24 +3,21 @@
 
 ## 手工进行优化
 
-https://github.com/flame/how-to-optimize-gemm
-
-https://github.com/BBuf/tvm_mlir_learn/tree/main/optimize_gemm/how_to_optimize_gemm
+- https://github.com/flame/how-to-optimize-gemm
+- https://github.com/BBuf/tvm_mlir_learn/tree/main/optimize_gemm/how_to_optimize_gemm
 
 ## tvm 中的调度原语
 
 [调度原语](./schedule_intrinsic/)
 
-https://zhuanlan.zhihu.com/p/94846767
-
-https://github.com/StrongSpoon/tvm.schedule
+- https://zhuanlan.zhihu.com/p/94846767
+- https://github.com/StrongSpoon/tvm.schedule
 
 
 ## 利用tvm进行优化
 
-https://zhuanlan.zhihu.com/p/508283737
-
-https://github.com/BBuf/tvm_mlir_learn/tree/main/optimize_gemm/optimize_matmul_in_gemm
+- https://zhuanlan.zhihu.com/p/508283737
+- https://github.com/BBuf/tvm_mlir_learn/tree/main/optimize_gemm/optimize_matmul_in_gemm
 
 ## 相关知识
 
@@ -110,4 +107,4 @@ RoofLine 模型是一个用于评估程序在硬件上能达到的性能上界�
 
 对于深度学习模型推理而言，推理框架对模型性能的影响主要体现在：是否充分利用了硬件的流水线资源、是否高效利用了硬件中的缓存、是否采用了时间复杂度更低的算法、是否解决了操作系统带来的性能损失（如上文的调度问题和内存缺页问题）、是否进行了正确高效的图优化等等。
 
-[ref](https://zhuanlan.zhihu.com/p/411522457)
+- https://zhuanlan.zhihu.com/p/411522457
