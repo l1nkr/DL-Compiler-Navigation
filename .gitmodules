@@ -1,3 +1,6 @@
 [submodule "hpc/parallel_cxx"]
 	path = hpc/parallel_cxx
 	url = https://github.com/parallel101/course.git
+[submodule "cuda"]
+	path = cuda
+	url = git@github.com:l1nkr/CUDA_Freshman.git

@@ -6,12 +6,14 @@
 - [TVM 调度原语](./hpc/schedule_intrinsic/)
 - [TVM 源码走读](./note/)
 - [相关论文的概述](./paper/)
-- [hpc](./hpc/)
+- [HPC](./hpc/)
+  - [逐步优化GEMM](./hpc/gemm/)
+  - [C++高性能编程](./hpc/parallel_cxx/)
+- [CUDA](./cuda/)
 
 未来计划加入
 
-- CUDA 教程
-- LLVM 相关
+- LLVM
 - 使用 PyTorch 训练主流模型
 - 如何使用 TVM 支持新硬件
 - 简易推理框架的开发
