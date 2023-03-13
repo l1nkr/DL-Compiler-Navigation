@@ -4,3 +4,6 @@
 [submodule "cuda"]
 	path = cuda
 	url = git@github.com:l1nkr/CUDA_Freshman.git
+[submodule "ToyLang"]
+	path = ToyLang
+	url = https://github.com/l1nkr/Toylang.git

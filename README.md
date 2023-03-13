@@ -10,10 +10,10 @@
   - [逐步优化GEMM](./hpc/gemm/)
   - [C++高性能编程](./hpc/parallel_cxx/)
 - [CUDA](./cuda/)
+- [基于LLVM的ToyLang](./ToyLang/)
 
 未来计划加入
 
-- LLVM
 - 使用 PyTorch 训练主流模型
 - 如何使用 TVM 支持新硬件
 - 简易推理框架的开发
