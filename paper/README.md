@@ -16,6 +16,8 @@
 
 [Infrastructe](./infra.md)
 
+[Other](./other.md)
+
 [TODO](./todo.md)
 
 ## 相关资料

@@ -35,6 +35,30 @@
 
 基于这些想法，Roller提出了rTile，这是一种新的抽象，它封装了硬件加速器的关键特征以及输入张量shape一致的数据块（Tile）shape。然后**将数据处理管道描述为基于rTile的程序（rProgram），由Load, Store, Compute 三个接口组成，作用于rTile。**
 
+## Astitch: Enabling a New Multi-dimensional Optimization Space for Memory-Intensive ML Training and Inference on Modern SIMT Architectures (ASPLOS 2022)
+
+现有困难：
+1. 在有 jit 需求且存在两层依赖的情况下，进行 fusion 会造成大量计算消耗，不进行 fusion 会生成大量的 kernel function
+  1. Operator-level dependency在计算图中，operator 会有复杂的连接
+     Element-level dependency，存在一对多的数据依赖
+     由于 ML 非常多样，想要做出通用的编译器，就需要使用 JIT 进行优化
+  2. Fusion
+     现有解决方案，在进行 fusion 的时候，只能使用单个线程的寄存器(也就是说数据具有局部性)。如果存在 1-n 的依赖，那么就需要就算 n 次，才能进行 fusion。因此会造成很大的算力消耗
+  3. Not fusion
+     会产生大量 kernel，从而造成大量上下文切换、调度开销
+2. Tensor shape 是不规则的，没有较好的手段提高并行性（需要进行 JIT，无法事先知道 tensor shape）
+     Key: 不规则的 tensor shape 造成了许多 small partition on gpu或者很多 large partition on gpu。这两种情况都会造成硬件利用率低。主要是由于 reduce ops 引起的
+
+核心思想（或者说目的）：
+1. 减少 off-ship memory 访问
+2. 减少 CPU-GPU 上下文切换
+3. 通过减少 kernel 数量以降低framework-level operator 调度开销
+
+解决方案：
+1. 使用hierarchical data reuse 解决第一个困难
+2. 使用adaptive thread mapping 解决第二个困难
+3. 基于几个 key observation 支持自动调优
+
 ## HALO
 
 Heterogeneity-Aware Lowering and Optimization(HALO)是异构计算加速度基于编译器的技术平台。
