@@ -1,13 +1,21 @@
 # DL-Complier-Navigation
 
 [Tuning and Schedule](./tuning.md)
+
 [Compiler and IR](./ir.md)
+
 [Graph-level Optimization](./graph.md)
+
 [Graph Neural Network](./gnn.md)
+
 [Distributed_Computing](./distributed_computing.md)
+
 [Resource Scheduling](./resource.md)
+
 [Polyhedral](./polyhedral.md)
+
 [Infrastructe](./infra.md)
+
 [TODO](./todo.md)
 
 ## 相关资料
