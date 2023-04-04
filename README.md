@@ -8,10 +8,10 @@
 - [相关论文的概述](./paper/)
 - [HPC](./hpc/)
   - [逐步优化GEMM](./hpc/gemm/)
-  - [C++高性能编程](./hpc/parallel_cxx/)
-- [CUDA](./cuda/)
-- [基于LLVM的ToyLang](./ToyLang/)
-- [推理框架的开发](./infer)
+  - [C++高性能编程](https://github.com/parallel101/course)
+- [CUDA](https://github.com/Tony-Tan/CUDA_Freshman)
+- [基于LLVM的ToyLang](https://github.com/l1nkr/Toylang)
+- [推理框架的开发](./infer/note)
 
 未来计划加入
 
