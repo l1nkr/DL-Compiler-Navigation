@@ -59,6 +59,14 @@
 2. 使用adaptive thread mapping 解决第二个困难
 3. 基于几个 key observation 支持自动调优
 
+## Hidet: Task-Mapping Programming Paradigm for Deep Learning Tensor Programs(ASPLOS 2023)
+
+深度学习编译器，例如 Apache TVM，采用声明式调度原语来降低开发张量程序的门槛。 然而，这种方法无法进行一些优化（例如，双缓冲）。 
+
+- 将调度过程嵌入到张量程序中，并使用称为任务映射的专用映射来直接在张量程序中定义计算分配和排序。这种新方法允许开发人员以更精细的粒度操作张量程序（例如，允许程序语句级优化），从而极大地丰富了可表达的优化。 
+- 提出了一种新的调度后融合优化，使开发人员可以专注于调度每个单独的算子，并在调度后自动融合。 它大大减少了算子融合的工程工作量。 
+- 提出的范例还构建了一个高效的以硬件为中心的调度空间，它与程序输入大小无关，并大大减少了调整时间。
+
 ## HALO
 
 Heterogeneity-Aware Lowering and Optimization(HALO)是异构计算加速度基于编译器的技术平台。
