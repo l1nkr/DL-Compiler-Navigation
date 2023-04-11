@@ -6,13 +6,6 @@
 - https://github.com/flame/how-to-optimize-gemm
 - https://github.com/BBuf/tvm_mlir_learn/tree/main/optimize_gemm/how_to_optimize_gemm
 
-## tvm 中的调度原语
-
-[调度原语](./schedule_intrinsic/)
-
-- https://zhuanlan.zhihu.com/p/94846767
-- https://github.com/StrongSpoon/tvm.schedule
-
 
 ## 利用tvm进行优化
 

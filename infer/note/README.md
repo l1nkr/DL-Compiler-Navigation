@@ -8,4 +8,4 @@
 - 单元测试：Google Test
 - 性能测试：Google Benchmark
 
-注：文档更新有延迟，具体实现请看代码
+注：文档更新有延迟，具体实现请看[代码](https://github.com/zjhellofss/KuiperInfer)

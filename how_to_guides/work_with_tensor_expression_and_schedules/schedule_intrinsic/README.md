@@ -505,3 +505,7 @@ produce B {
   B[0] = reduce_temp0[0]
 }
 ```
+
+参考：
+- https://zhuanlan.zhihu.com/p/94846767
+- https://github.com/StrongSpoon/tvm.schedule
