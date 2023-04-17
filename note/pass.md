@@ -1,6 +1,6 @@
 # pass
 
-## 初始 pass
+# 初始 pass
 
 ```python
 with tvm.transform.PassContext(opt_level=3):
@@ -17,7 +17,7 @@ Pass 是 TVM 中基于 Relay IR 进行的一系列优化，类似于 onnx-simpli
 - **Pass** 执行 pass 的主体，这是一个基类。
 - **Sequential** 是一个 container，用于装载 Pass。
 
-## pass infrastructure
+# pass infrastructure
 
 Relay 和 TVM IR 都包含一系列优化 passes，可提高模型的性能指标。TVM 有一套标准优化方法以及特定于机器学习的优化方法，包括常量折叠、死代码消除、运算符布局更改、算符融合、缓冲区处理和循环变换等。每一个 Pass 都使用在 traversal 期间和 / 或之前收集的分析结果
 
@@ -30,9 +30,11 @@ Relay 和 TVM IR 都包含一系列优化 passes，可提高模型的性能指�
 - 减轻 passes 之间的依赖关系。
 - 降低实现新 passes 的难度。
 
-### python frontend
+## python frontend
 
-#### PassContext
+前端只需要一些简单的 API。后端接收信息，并决定用哪个函数来创建 Pass 对象。
+
+### PassContext
 
 Python 前端为 `PassContext` 提供了一个包装器，通过覆盖 `__enter__` 和 `__exit__` 来启用 with 语法。 为用户提供了一个 `current` 静态方法来获取在特定范围内使用的上下文。
 
@@ -54,9 +56,11 @@ class PassContext(tvm.runtime.Object):
         return _transform.GetCurrentPassContext()
 ```
 
-#### Pass Objects
+### Pass Objects
 
-Pass 是所有 pass 对象的基类。 这里的所有方法都只是简单的包装器，仅仅为了api易于使用。 在 pass 基类中只定义了一个__call__来使子类成为可调用对象，以便它们可以很容易地被调用（例如 pass_xx(arg)）来执行。
+Pass 是所有 pass 对象的基类。 这里的所有方法都只是在后端实现的简单 wrapper。是为方便用户与 Python 中的基类交互而定义的。 在 pass 基类中只定义了一个__call__来使子类成为可调用对象，以便它们可以很容易地被调用（例如 pass_xx(arg)）来执行。
+
+对于在 C++ 后端实现的所有 pass，分别在 python/tvm/ir/transform.py 和 python/tvm/relay/transform/transform.py 中提供了相应的 Python API
 
 ```python
 @register_relay_node
@@ -91,9 +95,9 @@ mod = relay.Module()
 mod = module_pass(mod)
 ```
 
-### c++ backend
+## c++ backend
 
-#### PassInfo
+### PassInfo
 
 ```c++
 class PassInfoNode : public Object {
@@ -110,13 +114,76 @@ class PassInfoNode : public Object {
 - `required` 表示执行某个 pass 所需的 pass。
   - `required` 字段可以让 pass infra 解决 pass 依赖关系。
 
-#### PassContext
+### PassContext
 
 `PassContext` 带有用于调试 pass 的有用信息。 
 - 例如，它包含错误报告系统，pass 的作者可以提供有关优化失败原因的注释。 
-- `PassContext` 还旨在替换旧的 `BuildConfig`，它用于帮助用户配置编译选项，包括优化级别、依赖和需要禁用的 pass 等。
+- 帮助用户配置编译选项，包括 opt_level、依赖和需要禁用的 pass 等。
 
-#### PassConstructs
+```c++
+class PassContextNode : public Object {
+ public:
+  int opt_level{2};
+  tvm::Array<tvm::Expr> required_pass;
+  tvm::Array<tvm::Expr> disabled_pass;
+  mutable Optional<DiagnosticContext> diag_ctx;
+  Map<String, ObjectRef> config;
+  Array<instrument::PassInstrument> instruments;
+};
+
+class PassContext : public NodeRef {
+ public:
+  TVM_DLL static PassContext Create();
+  TVM_DLL static PassContext Current();
+  TVM_DLL void InstrumentEnterPassContext();
+  TVM_DLL void InstrumentExitPassContext();
+  TVM_DLL bool InstrumentBeforePass(const IRModule& mod, const PassInfo& info) const;
+  TVM_DLL void InstrumentAfterPass(const IRModule& mod, const PassInfo& info) const;
+ private:
+  TVM_DLL void EnterWithScope();
+  TVM_DLL void ExitWithScope();
+};
+```
+
+### Pass Instrument
+
+Pass Instrument 是一种分析 pass 本身的机制。例如，可以用基础架构来了解 pass 需要多少时间和内存，或者 pass 如何转换 IR 模块。
+
+在 PassContext 的生命周期中引入了四个检测点。
+
+```c++
+TVM_DLL static InstrumentEnterPassContext();
+TVM_DLL static InstrumentExitPassContext();
+TVM_DLL static InstrumentBeforePass();
+TVM_DLL static InstrumentAfterPass();
+```
+
+进入 PassContext 实例的范围时，立即调用 InstrumentEnterPassContext。
+
+离开了 PassContext 的范围或者 pass 执行过程中发生了异常，会调用 InstrumentExitPassContext。当工具类被 tvm.transform.PassContext 中的 override_instruments 覆盖时，也会调用此方法。
+
+InstrumentBeforePass 在执行前被调用。如果要在执行后运行 pass，则调用 InstrumentAfterPass。
+
+- **`PassInstrument` 接口和 `PassContext` 方法的关系**。更多详细信息，参阅（src/ir/transform.cc）。
+
+- `InstrumentEnterPassContext`
+  EnterPassContext() 按照传递给 PassContext 的 instruments 的顺序执行。
+  当抛出异常时，PassContext 通过清除所有已注册的 PassInstrument 实例来禁用 pass 工具。然后 PassContext 执行每个成功完成 EnterPassContext() 的 PassInstrument 实例的 ExitPassContext() 方法
+  例如，如果将 PassInstrument A、B 和 C 注册到 PassContext 并且 A 完成 EnterPassContext() 而 B 抛出异常，则永远不会执行 C；而执行 A 的 ExitPassContext()。
+- `InstrumentExitPassContext`
+  按照传递给 PassContext 的 instruments 的顺序执行每个 PassInstrument 实例的 ExitPassContext()。
+  发生异常时，instruments 被清除。
+  在抛出异常后注册的 PassInstrument 实例不执行 ExitPassContext。
+- `InstrumentBeforePass`
+  如果该 pass 未列为必需 pass，则执行 ShouldRun。
+  如果 pass 没有被 ShouldRun 阻止，则 RunBeforePass 将按照 instruments 的顺序执行。
+  请注意， InstrumentBeforePass 返回一个布尔值，指示是否应该运行 pass。
+  当异常发生时，立即抛出。我们依赖 Python 上下文管理器安全退出 PassContext（意味着每个工具的 ExitPassContext 都会运行。对于 C++，参考 include/tvm/support/with.h。）
+- `InstrumentAfterPass`
+  RunAfterPass 按照传递给 PassContext 的 instruments 的顺序执行。
+  当异常发生时，立即抛出。依靠 Python 上下文管理器或 With 类（include/tvm/support/with.h）安全退出 PassContext。
+
+### PassConstructs
 
 `pass infra` 是以分层方式设计的，它可以在不同粒度下工作(Relay/tir)。
 
@@ -213,7 +280,7 @@ Pass Sequential(tvm::Array<Pass> passes, PassInfo pass_info);
 ```
 提供了一些 helper function 来创建上述每种类型的 Pass。 这些 helper function 也暴露给 Python 前端，以便用户可以方便地使用 Python API 来创建特定的 pass 对象
 
-#### Pass Registration
+### Pass Registration
 
 下面以注册 *constant folding* 为例。
 
@@ -236,4 +303,5 @@ TVM_DLL Pass FoldConstant();
 为了允许其他 C++ 模块应用此 pass，需要进行以上声明。
 
 参考
+- https://tvm.apache.org/docs/arch/pass_infra.html
 - http://www.giantpandacv.com/project/%E9%83%A8%E7%BD%B2%E4%BC%98%E5%8C%96/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E8%AF%91%E5%99%A8/%E3%80%90%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%AD%A6%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%BC%96%E8%AF%91%E5%99%A8%E3%80%91%E4%B8%83%EF%BC%8C%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%E5%85%A5%E9%97%A8TVM%20Pass/
