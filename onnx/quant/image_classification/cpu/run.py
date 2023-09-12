@@ -49,7 +49,7 @@ def main():
     input_model_path = args.input_model
     output_model_path = args.output_model
     calibration_dataset_path = args.calibrate_dataset
-    dr = resnet50_data_reader.ResNet50DataReader(
+    data_reader = resnet50_data_reader.ResNet50DataReader(
         calibration_dataset_path, input_model_path
     )
 
@@ -58,10 +58,11 @@ def main():
     quantize_static(
         input_model_path,
         output_model_path,
-        dr,
+        data_reader,
         quant_format=args.quant_format,
         per_channel=args.per_channel,
         weight_type=QuantType.QInt8,
+        optimize_model=False
     )
     print("Calibrated and quantized model saved.")
 

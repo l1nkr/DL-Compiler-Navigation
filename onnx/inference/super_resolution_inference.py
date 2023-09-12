@@ -29,24 +29,6 @@ import torch.utils.model_zoo as model_zoo
 import torch.onnx
 
 
-######################################################################
-# Super-resolution is a way of increasing the resolution of images, videos
-# and is widely used in image processing or video editing. For this
-# tutorial, we will use a small super-resolution model.
-#
-# First, let's create a ``SuperResolution`` model in PyTorch.
-# This model uses the efficient sub-pixel convolution layer described in
-# `"Real-Time Single Image and Video Super-Resolution Using an Efficient
-# Sub-Pixel Convolutional Neural Network" - Shi et al <https://arxiv.org/abs/1609.05158>`__
-# for increasing the resolution of an image by an upscale factor.
-# The model expects the Y component of the ``YCbCr`` of an image as an input, and
-# outputs the upscaled Y component in super resolution.
-#
-# `The
-# model <https://github.com/pytorch/examples/blob/master/super_resolution/model.py>`__
-# comes directly from PyTorch's examples without modification:
-#
-
 # Super Resolution model definition in PyTorch
 import torch.nn as nn
 import torch.nn.init as init
@@ -80,19 +62,6 @@ class SuperResolutionNet(nn.Module):
 
 # Create the super-resolution model by using the above model definition.
 torch_model = SuperResolutionNet(upscale_factor=3)
-
-
-######################################################################
-# Ordinarily, you would now train this model; however, for this tutorial,
-# we will instead download some pretrained weights. Note that this model
-# was not trained fully for good accuracy and is used here for
-# demonstration purposes only.
-#
-# It is important to call ``torch_model.eval()`` or ``torch_model.train(False)``
-# before exporting the model, to turn the model to inference mode.
-# This is required since operators like dropout or batchnorm behave
-# differently in inference and training mode.
-#
 
 # Load pretrained model weights
 model_url = 'https://s3.amazonaws.com/pytorch/test_data/export/superres_epoch100-44c6958e.pth'
@@ -145,43 +114,11 @@ torch.onnx.export(torch_model,               # model being run
                   dynamic_axes={'input' : {0 : 'batch_size'},    # variable length axes
                                 'output' : {0 : 'batch_size'}})
 
-######################################################################
-# We also computed ``torch_out``, the output after of the model,
-# which we will use to verify that the model we exported computes
-# the same values when run in ONNX Runtime.
-#
-# But before verifying the model's output with ONNX Runtime, we will check
-# the ONNX model with ONNX API.
-# First, ``onnx.load("super_resolution.onnx")`` will load the saved model and
-# will output a ``onnx.ModelProto`` structure (a top-level file/container format for bundling a ML model.
-# For more information `onnx.proto documentation <https://github.com/onnx/onnx/blob/master/onnx/onnx.proto>`__.).
-# Then, ``onnx.checker.check_model(onnx_model)`` will verify the model's structure
-# and confirm that the model has a valid schema.
-# The validity of the ONNX graph is verified by checking the model's
-# version, the graph's structure, as well as the nodes and their inputs
-# and outputs.
-#
-
 import onnx
 
 onnx_model = onnx.load("super_resolution.onnx")
 onnx.checker.check_model(onnx_model)
 
-
-######################################################################
-# Now let's compute the output using ONNX Runtime's Python APIs.
-# This part can normally be done in a separate process or on another
-# machine, but we will continue in the same process so that we can
-# verify that ONNX Runtime and PyTorch are computing the same value
-# for the network.
-#
-# In order to run the model with ONNX Runtime, we need to create an
-# inference session for the model with the chosen configuration
-# parameters (here we use the default config).
-# Once the session is created, we evaluate the model using the run() API.
-# The output of this call is a list containing the outputs of the model
-# computed by ONNX Runtime.
-#
 
 import onnxruntime
 
@@ -201,35 +138,6 @@ print("Exported model has been tested with ONNXRuntime, and the result looks goo
 
 
 ######################################################################
-# We should see that the output of PyTorch and ONNX Runtime runs match
-# numerically with the given precision (``rtol=1e-03`` and ``atol=1e-05``).
-# As a side-note, if they do not match then there is an issue in the
-# ONNX exporter, so please contact us in that case.
-#
-
-
-######################################################################
-# Running the model on an image using ONNX Runtime
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
-
-
-######################################################################
-# So far we have exported a model from PyTorch and shown how to load it
-# and run it in ONNX Runtime with a dummy tensor as an input.
-
-######################################################################
-# For this tutorial, we will use a famous cat image used widely which
-# looks like below
-#
-# .. figure:: /_static/img/cat_224x224.jpg
-#    :alt: cat
-#
-
-######################################################################
-# First, let's load the image, preprocess it using standard PIL
-# python library. Note that this preprocessing is the standard practice of
-# processing data for training/testing neural networks.
 #
 # We first resize the image to fit the size of the model's input (224x224).
 # Then we split the image into its Y, Cb, and Cr components.
@@ -244,7 +152,7 @@ print("Exported model has been tested with ONNXRuntime, and the result looks goo
 from PIL import Image
 import torchvision.transforms as transforms
 
-img = Image.open("cat.jpg")
+img = Image.open("/Users/fl/github/IfonPIM/test/onnx_infer/input/cat.jpg")
 
 resize = transforms.Resize([224, 224])
 img = resize(img)
@@ -288,22 +196,4 @@ final_img = Image.merge(
     ]).convert("RGB")
 
 # Save the image, we will compare this with the output image from mobile device
-final_img.save("cat_superres_with_ort.jpg")
-
-
-######################################################################
-# .. figure:: /_static/img/cat_superres_with_ort.jpg
-#    :alt: output\_cat
-#
-#
-# ONNX Runtime being a cross platform engine, you can run it across
-# multiple platforms and on both CPUs and GPUs.
-#
-# ONNX Runtime can also be deployed to the cloud for model inferencing
-# using Azure Machine Learning Services. More information `here <https://docs.microsoft.com/en-us/azure/machine-learning/service/concept-onnx>`__.
-#
-# More information about ONNX Runtime's performance `here <https://github.com/microsoft/onnxruntime#high-performance>`__.
-#
-#
-# For more information about ONNX Runtime `here <https://github.com/microsoft/onnxruntime>`__.
-#
+final_img.save("/Users/fl/github/IfonPIM/test/onnx_infer/input/cat_superres_with_ort.jpg")
